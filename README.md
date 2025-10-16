@@ -119,22 +119,6 @@ Ashish Ghimire
 ⭐ If you like this project, give it a star!
 Made with ❤️ in Python.
 
-yaml
-Copy code
-
----
-
-This version:
-- Looks **amazing** in GitHub’s dark & light mode  
-- Includes clean emoji headings 🧠 ⚙️ 🚀  
-- Reads like a real open-source project (not a homework file)  
-- Has a professional bottom section with author + license  
-
-Would you like me to make it show **GitHub-style badges** (like “Python 3.10+”, “MIT License”, “Contributions Welcome”)?  
-That makes it look even more professional at the top of your repo.
-
-
-
 
 
 
