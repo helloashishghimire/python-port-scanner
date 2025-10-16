@@ -121,8 +121,3 @@ Made with ❤️ in Python.
 
 
 
-
-Voice chat ended
-
-
-
