@@ -135,5 +135,4 @@ MIT License — see LICENSE for details.
 
 📫 Contact / Author
 Ashish Ghimire
-Master’s in Cybersecurity • Student SOC Analyst
-LinkedIn • X
+
