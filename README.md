@@ -1,138 +1,144 @@
 # 🔍 Python Port Scanner
 
-A fast, simple, **asynchronous TCP port scanner** for learning and small-scale network discovery.  
-Built with `asyncio` and `asyncio.open_connection` — designed for education, automation practice, and SOC lab use.
+> A fast, simple, **threaded TCP port scanner** for learning, ethical hacking labs, and small-scale network discovery.  
+> Built using Python’s `socket` and `concurrent.futures` — no external dependencies.
 
 ---
 
-## ⚡ Quick pitch
-Scan a host or CIDR range quickly and concurrently. Good for learning how TCP port probing works, practising network reconnaissance in authorized environments, and integrating into security tooling pipelines.
+## ⚡ Overview
+This lightweight scanner helps you understand how TCP connections and port probing work.  
+Perfect for **students**, **SOC analysts**, and **cybersecurity enthusiasts** experimenting in controlled environments.
 
 ---
 
 ## ✨ Features
-- Asynchronous scanning for high performance (uses `asyncio`).
-- Scan single IPs, hostnames, or CIDR ranges.
-- Range and list port scanning (e.g., `1-1024` or `22,80,443`).
-- Adjustable concurrency and timeout.
-- Optional CSV or plain-text output.
-- Clean, minimal dependency list.
+- 🧠 **Multithreaded** scanning for high performance  
+- 🌐 Scan **single hosts** or **CIDR ranges** (IPv4)  
+- ⚙️ Supports port **ranges** (`1-1024`) and **lists** (`22,80,443`)  
+- 🕒 Configurable **timeout** and **thread count**  
+- 🧾 Optional **banner grabbing** for open ports  
+- 🧰 Clean output, no dependencies, pure Python  
 
 ---
 
 ## 🔧 Requirements
-- Python 3.10+ recommended
-- Uses only standard library (no external deps required) — optional `rich` for nicer output
+- **Python 3.7+** (Recommended: 3.10+)
+- No external packages required
 
-Install (optional `rich`):
+Install (optional `rich` for colorful output):
 ```bash
-python -m pip install rich
+pip install rich
 💾 Installation
-Clone and run:
+Clone this repository:
 
 bash
 Copy code
 git clone https://github.com/helloashishghimire/python-port-scanner.git
 cd python-port-scanner
-# run directly with python
-python scanner.py --help
-🚀 Usage examples
-Scan common ports on a single host:
+Run help:
 
 bash
 Copy code
-python scanner.py -t 192.168.1.10 -p 22,80,443
-Scan first 1024 ports on a host:
+python3 simple_port_scanner.py --help
+🚀 Usage Examples
+Scan specific ports
+bash
+Copy code
+python3 simple_port_scanner.py --host example.com --ports 22,80,443
+Scan a full range
+bash
+Copy code
+python3 simple_port_scanner.py -H 192.168.1.10 -p 1-1024
+CIDR range with banners
+bash
+Copy code
+python3 simple_port_scanner.py --cidr 192.168.1.0/28 --ports 22,80 --banner
+Custom threads and timeout
+bash
+Copy code
+python3 simple_port_scanner.py -H 10.0.0.5 -p 22,80,443 -w 200 --timeout 0.8
+⚙️ CLI Options
+Flag	Description
+-H, --host	Hostname or IPv4 address to scan
+-C, --cidr	CIDR range (e.g., 192.168.1.0/28)
+-p, --ports	Comma-separated or ranged ports (required)
+-w, --workers	Number of concurrent threads (default: 100)
+--banner	Attempt simple banner grabbing
+--timeout	Socket timeout (default: 1.0s)
+-h, --help	Show help message
+
+🧠 How It Works
+Parses ports → list & range support
+
+Expands targets → resolves host or CIDR range
+
+Threads → launches parallel connections
+
+Connects via socket → checks TCP port status
+
+Prints results → shows open ports and banners
+
+🔎 Example Output
+sql
+Copy code
+============================================================
+Scan results for 192.168.1.10 — 2 open port(s)
+------------------------------------------------------------
+Port 22/tcp — OPEN — Banner: SSH-2.0-OpenSSH_8.6p1 Ubuntu-4ubuntu0.3
+Port 80/tcp — OPEN — Banner: HTTP/1.1 200 OK
+🧪 Test It Safely
+Try scanning your local machine or a lab VM:
 
 bash
 Copy code
-python scanner.py -t example.com -p 1-1024 -T 0.5
-Scan a CIDR range (example: 192.168.1.0/28) with concurrency:
+python3 simple_port_scanner.py -H 127.0.0.1 -p 22,80,443
+✅ Works great for practice, SOC labs, and home-lab simulations.
 
-bash
-Copy code
-python scanner.py -t 192.168.1.0/28 -p 22,80 -c 200 -o results.csv
-Show verbose output:
+🛡️ Disclaimer
+This tool is for educational and authorized use only.
+Do not scan systems without explicit permission.
+Unauthorized scanning is illegal and unethical.
 
-bash
-Copy code
-python scanner.py -t 10.0.0.5 -p 22,80,443 -v
-⚙️ CLI options
-lua
-Copy code
--t, --target      Target IP / hostname / CIDR (required)
--p, --ports       Ports: comma-separated and/or ranges (e.g., 22,80,1000-1010)
--c, --concurrency Max concurrent connection tasks (default: 100)
--T, --timeout     Socket timeout in seconds (default: 1.0)
--o, --output      Save results to file (csv or txt by extension)
--v, --verbose     Verbose output (shows connection attempts)
---json            Output results as JSON
--h, --help        Show help message
-🔎 Example output
-pgsql
-Copy code
-[+] 192.168.1.10:22 OPEN
-[+] 192.168.1.10:80 OPEN
-[-] 192.168.1.10:443 CLOSED
-Scan complete: 3 ports scanned on 1 target
-Saved results to results.csv
-🧩 Example (core) implementation idea
-The repository includes an async scanner; below is the core pattern used:
+💡 Future Ideas
+CSV / JSON output
 
-python
-Copy code
-import asyncio
+AsyncIO rewrite for ultra-fast scanning
 
-async def check_port(host: str, port: int, timeout=1.0) -> bool:
-    try:
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port), timeout=timeout
-        )
-        writer.close()
-        await writer.wait_closed()
-        return True
-    except Exception:
-        return False
+Service fingerprinting
 
-async def scan_host(host: str, ports: list[int], concurrency: int = 100):
-    sem = asyncio.Semaphore(concurrency)
-    async def worker(port):
-        async with sem:
-            open_ = await check_port(host, port)
-            if open_:
-                print(f"[+] {host}:{port} OPEN")
-    await asyncio.gather(*(worker(p) for p in ports))
-🛡️ Disclaimer & safe use
-This tool is for educational purposes only.
-Only scan systems you own or have explicit permission to test. Unauthorized scanning can be illegal and unethical. By using this tool you accept responsibility for your actions.
-
-🧪 Tests & validation
-Manual testing recommended on local lab networks (e.g., VMs or isolated subnets).
-
-Example: spin up a small VM with SSH enabled (port 22) and test scanning against it.
-
-🛠️ Development & contribution
-Contributions welcome! Suggested workflow:
-
-Fork the repo
-
-Create a feature branch: git checkout -b feat/async-timeout
-
-Commit & open a PR with description and test cases
-
-Ideas:
-
-Add UDP scanning (careful: requires privileged sockets / raw sockets)
-
-Add service banner grabbing for open ports
-
-Integrate rich for better terminal UX
-
-Add a web UI for quick scans in a lab environment
+Web dashboard for visualization
 
 📜 License
-MIT License — see LICENSE for details.
+MIT License — Free to modify and distribute.
 
-📫 Contact / Author
+👤 Author
 Ashish Ghimire
+🎓 Cybersecurity Student | 💻 SOC Analyst | 🧠 Python Developer
+🔗 GitHub Profile →
+
+⭐ If you like this project, give it a star!
+Made with ❤️ in Python.
+
+yaml
+Copy code
+
+---
+
+This version:
+- Looks **amazing** in GitHub’s dark & light mode  
+- Includes clean emoji headings 🧠 ⚙️ 🚀  
+- Reads like a real open-source project (not a homework file)  
+- Has a professional bottom section with author + license  
+
+Would you like me to make it show **GitHub-style badges** (like “Python 3.10+”, “MIT License”, “Contributions Welcome”)?  
+That makes it look even more professional at the top of your repo.
+
+
+
+
+
+
+Voice chat ended
+
+
 
